@@ -1,4 +1,3 @@
-#!/bin/bash
 # Laura Dean
 # 17/6/25
 # script written for running on the UoN HPC Ada
@@ -28,12 +27,12 @@ cd $wkdir
 rm GSE108476-GPL570_series_matrix.txt
 
 # This downloaded the expression data fine but I then realised that the rembrandt dataset
-# is array based and information is only present at the gene level, so we cannot use this 
+# is array based and information is only present at the gene level, so we cannot use this
 # database to search for splice variants. I will try with the DepMap database as this is
 # RNAseq and also has glioblastoma samples.
 
 # Download the DepMap raw data
-
-
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR861/009/SRR8615649/SRR8615649_1.fastq.gz
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR861/009/SRR8615649/SRR8615649_2.fastq.gz
 
 
