@@ -19,6 +19,21 @@ wkdir=/gpfs01/home/mbzlld/data/rembrandt
 cd $wkdir
 
 # Download the rembrandt data with wget
-wget https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE108474&format=file
+#wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE108nnn/GSE108476/matrix/GSE108476-GPL570_series_matrix.txt.gz
+
+# extract the data
+#gunzip GSE108476-GPL570_series_matrix.txt.gz
+
+# remove this dataset as it isn't useful for our purposes
+rm GSE108476-GPL570_series_matrix.txt
+
+# This downloaded the expression data fine but I then realised that the rembrandt dataset
+# is array based and information is only present at the gene level, so we cannot use this 
+# database to search for splice variants. I will try with the DepMap database as this is
+# RNAseq and also has glioblastoma samples.
+
+# Download the DepMap raw data
+
+
 
 
