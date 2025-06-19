@@ -32,7 +32,15 @@ rm GSE108476-GPL570_series_matrix.txt
 # RNAseq and also has glioblastoma samples.
 
 # Download the DepMap raw data
+# an example for a single cell line
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR861/009/SRR8615649/SRR8615649_1.fastq.gz
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR861/009/SRR8615649/SRR8615649_2.fastq.gz
 
+# for multiple cell lines
+#for srr in SRR8615649 SRR8615648; do
+#  pre=${srr:0:6}
+#  end=${srr: -3}
+#  wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}_1.fastq.gz
+#  wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}_2.fastq.gz
+#done
 
