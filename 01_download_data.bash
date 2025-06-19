@@ -39,7 +39,7 @@ cd $wkdir
 
 # for multiple cell lines from DepMap
 # create an array of accession numbers from input file that contains cell line names followed by run accessions
-accessions=$(tail -n +2 $cell_lines | cut -f2)
+accessions=($(tail -n +2 $cell_lines | cut -f2))
 
 for srr in ${accessions[@]}; do
   pre=${srr:0:6}
