@@ -130,8 +130,8 @@ sed -i '1s/^/accession\ttotal_reads\tKCNMA1_STREX_reads\tKCNMA1_reads\n/' $wkdir
 
 # and add percentage calculations
 awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($3 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
-awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_KCNM1"} NR>1 {printf "%s\t%.10f\n", $0, ($4 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
-awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNM1_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($5 / $6) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_KCNMA1"} NR>1 {printf "%s\t%.10f\n", $0, ($4 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($5 / $6) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
 
 # add cell line column to the results file from the cell_lines file
 awk -F'\t' '
