@@ -9,12 +9,11 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=10g
-#SBATCH --time=2:00:00
+#SBATCH --time=4:00:00
 #SBATCH --output=/gpfs01/home/mbzlld/code_and_scripts/slurm_out_scripts/slurm-%x-%j.out
 
 # set variables
 wkdir=/gpfs01/home/mbzlld/data/rembrandt
-reads1=$wkdir/SRR8615649_1.fastq.gz
 cell_lines=$wkdir/cell_lines.txt
 
 
@@ -46,8 +45,9 @@ reads=( "${reads[@]/%/_1.fastq.gz}" )
 primers=($wkdir/KCNMA1_STREX_primers.fa $wkdir/KCNMA1_primers.fa)
 
 
-
+# loop over the read files for each cell line 
 for file in "${reads[@]}" ; do
+	# loop over each primer
 	for primer in "${primers[@]}" ; do
 		# map the reads to primers
 		bbduk.sh \
@@ -70,4 +70,76 @@ for file in "${reads[@]}" ; do
 		
 	done
 done
+
+# deactivate software
+conda deactivate
+
+#####################################
+# Generate a summary of the results #
+#####################################
+
+
+############## FOR THE STREX OUTPUT FILES ###############
+
+# generate an array of output files to loop over
+outputs_STREX=( "${accessions[@]/#/$wkdir\/}" )
+outputs_STREX=( "${outputs_STREX[@]/%/_1_KCNMA1_STREX_stats.txt}" )
+
+
+# loop over output stats files and add to results
+touch $wkdir/results.txt # create empty file to write to
+i=1 # create for loop numbering
+for file in ${outputs_STREX[@]} ; do
+	
+	# start results file with list of accessions from output stats files
+	accession_no=$( sed -n '1p' $file | cut -f2 )
+	accession_no=$( basename ${accession_no%_*} )
+	echo $accession_no >> $wkdir/results.txt
+	
+	# add new column of total reads info to results file
+	sed -i "${i}s/$/\t$( sed -n '2p' $file | cut -f2 )/" $wkdir/results.txt
+	
+	# add new column of STREX splice variant reads to output
+	sed -i "${i}s/$/\t$( sed -n '3p' $file | cut -f2 )/" $wkdir/results.txt
+	
+	((i++))
+done
+
+
+############## FOR THE KCNMA1 OUTPUT FILES ###############
+
+# generate an array of output files to loop over
+outputs_KCNMA1=( "${accessions[@]/#/$wkdir\/}" )
+outputs_KCNMA1=( "${outputs_KCNMA1[@]/%/_1_KCNMA1_stats.txt}" )
+
+
+# loop over output stats files and add to results
+i=1 # create for loop numbering
+for file in ${outputs_KCNMA1[@]} ; do
+
+        # add new column of KCNM1 reads to output
+        sed -i "${i}s/$/\t$( sed -n '3p' $file | cut -f2 )/" $wkdir/results.txt
+	
+        ((i++))
+done
+
+######################
+
+# Finally add a header line
+sed -i '1s/^/accession\ttotal_reads\tKCNMA1_STREX_reads\tKCNMA1_reads\n/' $wkdir/results.txt
+
+# and add percentage calculations
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($3 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_KCNM1"} NR>1 {printf "%s\t%.10f\n", $0, ($4 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNM1_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($5 / $6) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+
+# add cell line column to the results file from the cell_lines file
+awk -F'\t' '
+    FNR==NR { map[$2]=$1; next }           # Read file2.tsv into a map using col1 as key and col2 as value
+    FNR==1 { print "cell_line", $0; next } # Add header to output
+    { print map[$1], $0 }                  # Prepend matched value from file2.tsv using col2 in file1.tsv as key
+' OFS='\t' $cell_lines $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+
+######################
+
 
