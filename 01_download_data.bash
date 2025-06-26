@@ -15,7 +15,7 @@
 # set variables
 wkdir=/gpfs01/home/mbzlld/data/rembrandt
 cell_lines=$wkdir/cell_lines.txt # tab delimited file, with header line, containing cell line names followed by run accessions
-
+cell_lines=$wkdir/SF188_accessions.txt
 # move to working directory
 cd $wkdir
 
