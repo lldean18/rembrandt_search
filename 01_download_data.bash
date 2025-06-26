@@ -41,10 +41,12 @@ cd $wkdir
 # create an array of accession numbers from input file that contains cell line names followed by run accessions
 accessions=($(tail -n +2 $cell_lines | cut -f2))
 
+# change between wget commands below depending on whether you data is paired or single end
 for srr in ${accessions[@]}; do
   pre=${srr:0:6}
   end="00${srr: -1}"
-  wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}_1.fastq.gz
- #wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}_2.fastq.gz
+  #wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}_1.fastq.gz
+  #wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}_2.fastq.gz
+  wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/$pre/$end/$srr/${srr}.fastq.gz
 done
 
