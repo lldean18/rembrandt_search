@@ -15,7 +15,7 @@
 # set variables
 wkdir=/gpfs01/home/mbzlld/data/rembrandt
 cell_lines=$wkdir/cell_lines.txt
-
+#cell_lines=$wkdir/SF188_accessions.txt
 
 # Install and load software
 source $HOME/.bash_profile
@@ -45,34 +45,34 @@ reads=( "${reads[@]/%/_1.fastq.gz}" )
 primers=($wkdir/KCNMA1_STREX_primers.fa $wkdir/KCNMA1_primers.fa)
 
 
-# loop over the read files for each cell line 
-for file in "${reads[@]}" ; do
-	# loop over each primer
-	for primer in "${primers[@]}" ; do
-		# map the reads to primers
-		bbduk.sh \
-		-Xmx2048M \
-		in=$file \
-		k=$K \
-		hdist=$HDIST \
-		mkh=$mkh \
-		out=$wkdir/$(basename "${file%.*.*}")_without_primers_$(basename "${primer%_*}").fastq \
-		outm=$wkdir/$(basename "${file%.*.*}")_with_primers_$(basename "${primer%_*}").fastq \
-		stats=$wkdir/$(basename "${file%.*.*}")_$(basename "${primer%_*}")_stats.txt \
-		ref=$primer
-		
-		# convert the real matches to fasta format
-		#seqtk seq -A $wkdir/$(basename "${file%.*.**}")_with_primers_$(basename "${primer%_*}").fastq > $wkdir/$(basename "${file%.*.*}")_reads_with_primers_$(basename "${primer%_*}").fasta
-		
-		# remove unnecessary files
-		rm $wkdir/$(basename "${file%.*.*}")_without_primers_$(basename "${primer%_*}").fastq
-		rm $wkdir/$(basename "${file%.*.*}")_with_primers_$(basename "${primer%_*}").fastq
-		
-	done
-done
-
-# deactivate software
-conda deactivate
+## loop over the read files for each cell line 
+#for file in "${reads[@]}" ; do
+#	# loop over each primer
+#	for primer in "${primers[@]}" ; do
+#		# map the reads to primers
+#		bbduk.sh \
+#		-Xmx2048M \
+#		in=$file \
+#		k=$K \
+#		hdist=$HDIST \
+#		mkh=$mkh \
+#		out=$wkdir/$(basename "${file%.*.*}")_without_primers_$(basename "${primer%_*}").fastq \
+#		outm=$wkdir/$(basename "${file%.*.*}")_with_primers_$(basename "${primer%_*}").fastq \
+#		stats=$wkdir/$(basename "${file%.*.*}")_$(basename "${primer%_*}")_stats.txt \
+#		ref=$primer
+#		
+#		# convert the real matches to fasta format
+#		#seqtk seq -A $wkdir/$(basename "${file%.*.**}")_with_primers_$(basename "${primer%_*}").fastq > $wkdir/$(basename "${file%.*.*}")_reads_with_primers_$(basename "${primer%_*}").fasta
+#		
+#		# remove unnecessary files
+#		rm $wkdir/$(basename "${file%.*.*}")_without_primers_$(basename "${primer%_*}").fastq
+#		rm $wkdir/$(basename "${file%.*.*}")_with_primers_$(basename "${primer%_*}").fastq
+#		
+#	done
+#done
+#
+## deactivate software
+#conda deactivate
 
 #####################################
 # Generate a summary of the results #
@@ -87,7 +87,7 @@ outputs_STREX=( "${outputs_STREX[@]/%/_1_KCNMA1_STREX_stats.txt}" )
 
 
 # loop over output stats files and add to results
-touch $wkdir/results.txt # create empty file to write to
+: > $wkdir/results.txt # create empty file to write to (empty the file if it already exists)
 i=1 # create for loop numbering
 for file in ${outputs_STREX[@]} ; do
 	
@@ -129,9 +129,28 @@ done
 sed -i '1s/^/accession\ttotal_reads\tKCNMA1_STREX_reads\tKCNMA1_reads\n/' $wkdir/results.txt
 
 # and add percentage calculations
-awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($3 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
-awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_KCNMA1"} NR>1 {printf "%s\t%.10f\n", $0, ($4 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
-awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($5 / $6) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+#awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($3 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_STREX"} 
+NR>1 {
+  if ($2 == 0) {
+    print $0, "NA"
+  } else {
+    printf "%s\t%.10f\n", $0, ($3 / $2) * 100
+  }
+} ' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+
+
+
+#awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_KCNMA1"} NR>1 {printf "%s\t%.10f\n", $0, ($4 / $2) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "percent_KCNMA1"} 
+NR>1 {
+  if ($2 == 0) {
+	  print $0, "NA"
+  } else {
+  printf "%s\t%.10f\n", $0, ($4 / $2) * 100}}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+
+#awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($5 / $6) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 { if ($6 == 0) { print $0, "NA" } else { printf "%s\t%.10f\n", $0, ($5 / $6) * 100}}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
 
 # add cell line column to the results file from the cell_lines file
 awk -F'\t' '
