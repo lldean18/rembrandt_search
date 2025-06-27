@@ -20,6 +20,7 @@ wkdir=/gpfs01/home/mbzlld/data/rembrandt
 
 cell_lines=$wkdir/SF188_accessions.txt
 output_file=SF188_results.txt
+# make sure to also change the reads array to have the correct file ending for paired or unpaired fastqs
 
 # Install and load software
 source $HOME/.bash_profile
@@ -42,7 +43,8 @@ mkh=1
 # create an array of read files to loop over
 accessions=($(tail -n +2 $cell_lines | cut -f2))
 reads=( "${accessions[@]/#/$wkdir\/}" )
-reads=( "${reads[@]/%/_1.fastq.gz}" )
+#reads=( "${reads[@]/%/_1.fastq.gz}" )
+reads=( "${reads[@]/%/.fastq.gz}" )
 
 
 # create an array containing the primer files to loop over
