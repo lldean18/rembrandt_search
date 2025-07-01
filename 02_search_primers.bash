@@ -17,10 +17,11 @@ wkdir=/gpfs01/home/mbzlld/data/rembrandt
 
 #cell_lines=$wkdir/cell_lines.txt
 #output_file=results.txt
+#file_extension=_1.fastq.gz
 
 cell_lines=$wkdir/SF188_accessions.txt
 output_file=SF188_results.txt
-# make sure to also change the reads array to have the correct file ending for paired or unpaired fastqs
+file_extension=.fastq.gz
 
 # Install and load software
 source $HOME/.bash_profile
@@ -43,8 +44,7 @@ mkh=1
 # create an array of read files to loop over
 accessions=($(tail -n +2 $cell_lines | cut -f2))
 reads=( "${accessions[@]/#/$wkdir\/}" )
-#reads=( "${reads[@]/%/_1.fastq.gz}" )
-reads=( "${reads[@]/%/.fastq.gz}" )
+reads=( "${reads[@]/%/${file_extension}}" )
 
 
 # create an array containing the primer files to loop over
@@ -89,7 +89,7 @@ conda deactivate
 
 # generate an array of output files to loop over
 outputs_STREX=( "${accessions[@]/#/$wkdir\/}" )
-outputs_STREX=( "${outputs_STREX[@]/%/_1_KCNMA1_STREX_stats.txt}" )
+outputs_STREX=( "${outputs_STREX[@]/%/_KCNMA1_STREX_stats.txt}" )
 
 
 # loop over output stats files and add to results
@@ -99,6 +99,7 @@ for file in ${outputs_STREX[@]} ; do
 	
 	# start results file with list of accessions from output stats files
 	accession_no=$( sed -n '1p' $file | cut -f2 )
+	accession_no=$( basename ${accession_no%.*.*} )
 	accession_no=$( basename ${accession_no%_*} )
 	echo $accession_no >> $wkdir/$output_file
 	
@@ -116,7 +117,7 @@ done
 
 # generate an array of output files to loop over
 outputs_KCNMA1=( "${accessions[@]/#/$wkdir\/}" )
-outputs_KCNMA1=( "${outputs_KCNMA1[@]/%/_1_KCNMA1_stats.txt}" )
+outputs_KCNMA1=( "${outputs_KCNMA1[@]/%/_KCNMA1_stats.txt}" )
 
 
 # loop over output stats files and add to results
@@ -156,7 +157,7 @@ NR>1 {
   printf "%s\t%.10f\n", $0, ($4 / $2) * 100}}' $wkdir/$output_file > $wkdir/tmp && mv $wkdir/tmp $wkdir/$output_file
 
 #awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 {printf "%s\t%.10f\n", $0, ($5 / $6) * 100}' $wkdir/results.txt > $wkdir/tmp && mv $wkdir/tmp $wkdir/results.txt
-awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 { if ($6 == 0) { print $0, "NA" } else { printf "%s\t%.10f\n", $0, ($5 / $6) * 100}}' $wkdir/$output_file > $wkdir/tmp && mv $wkdir/tmp $wkdir/
+awk 'BEGIN {OFS="\t"} NR==1 {print $0, "proportion_KCNMA1_STREX"} NR>1 { if ($6 == 0) { print $0, "NA" } else { printf "%s\t%.10f\n", $0, ($5 / $6) * 100}}' $wkdir/$output_file > $wkdir/tmp && mv $wkdir/tmp $wkdir/$output_file
 
 # add cell line column to the results file from the cell_lines file
 awk -F'\t' '
